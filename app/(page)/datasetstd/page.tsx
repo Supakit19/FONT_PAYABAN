@@ -1,9 +1,21 @@
 "use client";
+
 import { GameContext } from "@/app/Contexts/Game/game.context";
 import { motion } from "framer-motion";
-import {} from "framer-motion/client";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
+import Swal from "sweetalert2";
+
+const isValidStudentID = (id: string): boolean => {
+  const validPrefixes = ["650", "660", "670", "680", "690"];
+  const trimmedId = id.trim();
+
+  // เช็คเลข 8 หลัก
+  if (!/^\d{8}$/.test(trimmedId)) return false;
+
+ 
+  return validPrefixes.some((prefix) => trimmedId.startsWith(prefix));
+};
 
 export default function HomeDatasetStd() {
   const router = useRouter();
@@ -16,13 +28,29 @@ export default function HomeDatasetStd() {
     }
   };
 
-  const handleNavigate = (e: React.FormEvent) => {
+  const handleNavigate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (studentId.trim()) {
-      handleStudentIdUpdate(studentId);
-      router.push(`/home1?studentId=${encodeURIComponent(studentId)}`);
+    if (!isValidStudentID(studentId)) {
+      await Swal.fire({
+        icon: "error",
+        title: "⛔ รหัสไม่ถูกต้อง",
+        text: "กรุณากรอกรหัสให้ถูกต้อง",
+        confirmButtonColor: "#f87171",
+        confirmButtonText: "ลองใหม่",
+        background: "#fff8fa",
+        customClass: {
+          popup: "rounded-2xl shadow-xl",
+          title: "font-mali text-xl text-red-600",
+          htmlContainer: "text-base text-gray-800 font-mali",
+          confirmButton: "rounded-full px-6 py-2 font-mali",
+        },
+      });
+      return;
     }
+
+    handleStudentIdUpdate(studentId);
+    router.push(`/home1`);
   };
 
   return (
